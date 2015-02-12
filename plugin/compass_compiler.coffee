@@ -24,17 +24,6 @@ RunCommand = (bin,args,file) ->
       column: e.column + 1
   ret
 
-ImportJsPath = (compileStep) ->
-  ###
-  return if path.basename(compileStep.inputPath) is "config.rb"
-  return Msg.warn "#{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
-  jspath = RunCommand Envs.Ruby.cmd, ["importpaths"], compileStep.inputPath
-  return compileStep.error jspath.error if jspath.error
-  contents = JSON.parse do jspath.result.toString
-  #console.log contents
-  contents
-  ###
-
 StylesheetCompiler = (compileStep) ->
   return if path.basename(compileStep.inputPath)[0] is "_"
   return Msg.warn "#{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
@@ -45,7 +34,6 @@ StylesheetCompiler = (compileStep) ->
     data: css.result
     #sourceMap: JSON.stringify sourceMap if tmpfile
 
-Plugin.registerSourceHandler "rb", {archMatching: 'os'}, ImportJsPath
-#Plugin.registerSourceHandler "json", (compileStep) ->
+#Plugin.registerSourceHandler "rb", {archMatching: 'os'}, ImportJsPath
 Plugin.registerSourceHandler "scss", {archMatching: 'web'}, StylesheetCompiler
 Plugin.registerSourceHandler "sass", {archMatching: 'web'}, StylesheetCompiler
