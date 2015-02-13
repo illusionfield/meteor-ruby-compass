@@ -1,5 +1,5 @@
 # -*- ruby -*-
-ruby "2.1.5"
+#ruby "2.1.5"
 source "https://rubygems.org"
 
 gem "sass"

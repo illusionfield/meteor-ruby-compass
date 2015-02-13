@@ -1,8 +1,3 @@
-#((global, factory) ->
-#) (if typeof window isnt "undefined" then window else this), (window, noGlobal) ->
-#  window.jQuery = window.$ = jQuery  if typeof noGlobal is strundefined
-#  jQuery
-
 @fs = Npm.require "fs"
 @path = Npm.require "path"
 {spawn} = Npm.require "child_process"
