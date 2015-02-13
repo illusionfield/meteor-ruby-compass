@@ -25,7 +25,7 @@
     cmd: "compass" #bundle exec compass
     spec: "required"
 
-UnAcceptable = ["test-packages","publish"]
+UnAcceptable = [ "publish" ] #,"test-packages"
 
 Colors.setTheme
   verbose: "cyan"

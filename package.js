@@ -18,7 +18,38 @@ Package.registerBuildPlugin({
 });
 
 Package.onTest(function(api) {
-  api.use('tinytest');
+  api.use(['test-helpers', 'tinytest', 'jquery', 'templating', 'blaze', 'ui']);
   api.use('illusionfield:ruby-compass');
-  api.addFiles('tests/tests.js');
+
+  api.add_files([
+    'tests/oscreenDiv.js',
+    'tests/presence/template.html',
+    'tests/presence/style.scss',
+    'tests/presence/test.js',
+
+    'tests/extend/template.html',
+    'tests/extend/style.scss',
+    'tests/extend/test.js',
+
+    'tests/operators/template.html',
+    'tests/operators/style.scss',
+    'tests/operators/test.js',
+
+    'tests/functions/template.html',
+    'tests/functions/style.scss',
+    'tests/functions/test.js',
+
+    'tests/mixin/template.html',
+    'tests/mixin/style.scss',
+    'tests/mixin/test.js',
+
+    'tests/import/template.html',
+    'tests/import/style.scss',
+    'tests/import/test.js',
+
+    'tests/sass/template.html',
+    'tests/sass/style.sass',
+    'tests/sass/test.js'
+
+  ], 'client');
 });
