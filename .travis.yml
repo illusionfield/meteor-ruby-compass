@@ -4,6 +4,14 @@ node_js:
   - "0.10"
 
 before_install:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
   - gem install bundler
   - bundle install
-  - "curl -L https://raw.githubusercontent.com/arunoda/travis-ci-meteor-packages/master/configure.sh | /bin/sh"
+  - curl https://install.meteor.com | /bin/sh
+  - meteor --version
+  - npm install -g spacejam
+  - phantomjs -v
+
+script:
+  - spacejam test-packages ./
