@@ -19,13 +19,13 @@
     cmd: "bundle"
     spec: "required"
   SASS:
-    cmd: "sass" #bundle exec sass
+    cmd: "sass"
     spec: "required"
   Compass:
-    cmd: "compass" #bundle exec compass
+    cmd: "compass"
     spec: "required"
 
-UnAcceptable = [ "publish" ] #,"test-packages"
+UnAcceptable = [ "publish" ]
 
 Colors.setTheme
   verbose: "cyan"
@@ -68,7 +68,6 @@ ArchiveUtility =
       gzip (if typeof str is "string" then str else new Buffer str), (error,buf) ->
         return future.throw error if error isnt null
         ret = buf?.toString? encoding or ""
-        console.log ret
         do future.return
       do future.wait
     catch e
@@ -91,9 +90,6 @@ RunCommand = (cmd,args) ->
     do future.return
   do future.wait
   do ret.toString
-
-#(spawn "cat", ["#{do process.cwd}/#{ConfigFiles.name}"]).stdout.on "data", (data) ->
-#  ArchiveUtility.compress data,"base64"
 
 CheckEnv = () ->
   ret = false

@@ -30,7 +30,7 @@ RunCommand = (bin,args,file) ->
 StylesheetCompiler = (compileStep) ->
   return if path.basename(compileStep.inputPath)[0] is "_"
   return Msg.warn "#{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
-  {error,result} = RunCommand Envs.SASS.cmd, ["--compass", "--sourcemap=inline", (if debug then "--trace")], compileStep.inputPath
+  {error,result} = RunCommand Envs.SASS.cmd, ["--compass", "--sourcemap=inline", (if debug then "--trace")], compileStep.fullInputPath
   return compileStep.error error if error
   compileStep.addStylesheet
     path: "#{compileStep.inputPath}.css"
