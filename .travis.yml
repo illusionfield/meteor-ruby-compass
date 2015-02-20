@@ -9,8 +9,9 @@ before_install:
   - gem install bundler
   - bundle install
   - curl https://install.meteor.com | /bin/sh
-  - meteor --version
   - npm install -g spacejam
+  - meteor --version
+  - npm -v
   - phantomjs -v
 
 script:

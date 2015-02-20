@@ -19,7 +19,7 @@ RunCommand = (bin,args,file) ->
       do future.return
     do future.wait
   catch e
-    console.error "#{Msg.banner 'error'} "+e
+    #console.error "#{Msg.banner 'error'} "+e
     ret.error =
       message: "#{Msg.banner 'error'} "+e
       sourcePath: e.filename or file

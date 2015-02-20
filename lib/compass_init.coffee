@@ -1,10 +1,10 @@
 @fs = Npm.require "fs"
 @path = Npm.require "path"
-{spawn} = Npm.require "child_process"
+{@spawn} = Npm.require "child_process"
 {gzip,gunzip} = Npm.require "zlib"
 @Future = Npm.require "fibers/future"
-@Colors = Npm.require "colors"
-@spawn = spawn
+Colors = Npm.require "colors"
+#@spawn = spawn
 
 @Envs =
   Ruby:
@@ -88,6 +88,10 @@ RunCommand = (cmd,args) ->
 
 CheckEnv = () ->
   ret = false
+  _(ConfigFiles).forEach ({name,content}) ->
+    return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
+    Msg.info "#{name} not exists, creating on project root!"
+    fs.writeFileSync confPath, ArchiveUtility.uncompress content,"base64"
   _(Envs).forEach ({cmd,spec}, name) ->
     try
       Envs[name].version = RunCommand cmd,["-v"]
@@ -95,11 +99,6 @@ CheckEnv = () ->
     catch e
       return Msg.err e if spec isnt "required"
       ret = e 
-  return ret if ret
-  confPath = "#{do process.cwd}/#{ConfigFiles[0].name}"
-  return if fs.existsSync confPath
-  Msg.info "#{ConfigFiles[0].name} not exists, creating on project root!"
-  fs.writeFileSync confPath, ArchiveUtility.uncompress ConfigFiles[0].content,"base64"
   ret
 
 Init = () ->

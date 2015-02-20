@@ -1,24 +1,21 @@
 # Folder view configuration files
 .DS_Store
 Desktop.ini
-Gemfile.lock
-
-# Thumbnail cache files
 ._*
+*~
 Thumbs.db
-
-# Files that might appear on external disks
 .Spotlight-V100
 .Trashes
+.Trash
 
 # Application specific files
+.npm*
 node_modules
-.sass-cache
-
-.meteor/local
 
 .build*
-.npm*
 .bundle
 bundle
+
+.sass-cache
 config.rb
+Gemfile.lock
