@@ -4,21 +4,6 @@
 {gzip,gunzip} = Npm.require "zlib"
 @Future = Npm.require "fibers/future"
 Colors = Npm.require "colors"
-#@spawn = spawn
-
-@Envs =
-  Ruby:
-    cmd: "ruby"
-    spec: "required"
-  Bundle:
-    cmd: "bundle"
-    spec: "required"
-  SASS:
-    cmd: "sass"
-    spec: "required"
-  Compass:
-    cmd: "compass"
-    spec: "required"
 
 UnAcceptable = [ "publish" ]
 
@@ -102,12 +87,14 @@ CheckEnv = () ->
   ret
 
 Init = () ->
-  try
-    return Msg.warn "Temporarily disabled feature...: #{arg}" if (arg=process.argv[2]) in UnAcceptable
-    throw err if (err=do CheckEnv)
-  catch e
-    Msg.err "#{e} --[ Package DISABLED! ]--"
-    return "Init failed"
-  return false
+  #try
+  return Msg.warn "#{arg} request: Temporarily not available in this package features ..." if (arg=process.argv[2]) in UnAcceptable
+  if (err=do CheckEnv)
+    Msg.err "#{err} --[ Package DISABLED! ]--"
+    throw err 
+  #catch e
+  #  throw err
+  #  return "Init failed"
+  #return false
 
 @CompassInit = do Init

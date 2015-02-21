@@ -1,7 +1,6 @@
-debug = true
-
 RunCommand = (bin,args,file) ->
   ret = result: "", error: ""
+  processCode = undefined
   try
     future = new Future()
     throw bin unless _.isString bin
@@ -13,15 +12,15 @@ RunCommand = (bin,args,file) ->
     cmd.stderr.on "data", (data) ->
       Msg.err data
     cmd.on "error", (err) ->
-      future.throw err
+      Msg.err err if compassDebug #future.throw err
+      return err
     cmd.on "close", (code) ->
-      Msg.warn "Process exited (#{code})" if code
+      return future.throw code if (processCode = code)
       do future.return
     do future.wait
   catch e
-    #console.error "#{Msg.banner 'error'} "+e
     ret.error =
-      message: "#{Msg.banner 'error'} "+e
+      message: "#{Msg.banner if processCode is -1 then 'error' else 'warning'} #{bin}: #{if compassDebug then e.stack else e}"
       sourcePath: e.filename or file
       line: e.line - 1
       column: e.column + 1
@@ -30,7 +29,9 @@ RunCommand = (bin,args,file) ->
 StylesheetCompiler = (compileStep) ->
   return if path.basename(compileStep.inputPath)[0] is "_"
   return Msg.warn "#{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
-  {error,result} = RunCommand Envs.SASS.cmd, ["--compass", "--sourcemap=inline", (if debug then "--trace")], compileStep.fullInputPath
+  args = [ "--compass", "--sourcemap=inline" ]
+  args.push "--trace" if compassDebug
+  {error,result} = RunCommand Envs.SASS.cmd, args, compileStep.fullInputPath
   return compileStep.error error if error
   compileStep.addStylesheet
     path: "#{compileStep.inputPath}.css"

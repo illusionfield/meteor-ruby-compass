@@ -1,5 +1,7 @@
-Tinytest.add "compass - operators", (test) ->
-  d = OnscreenDiv Template.operators
+testName = "operators"
+
+Tinytest.add "compass - #{testName}", (test) ->
+  d = new onScreenDiv "#{testName}"
   d.node().css "display", "block"
   i = d.node().find ".complimentary"
   test.equal i.css("float"), "right", "operators fail"
