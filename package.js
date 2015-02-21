@@ -14,7 +14,7 @@ Npm.depends({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3');
-  api.use(['coffeescript']);
+  api.use(['coffeescript', 'underscore']);
 });
 
 Package.registerBuildPlugin({

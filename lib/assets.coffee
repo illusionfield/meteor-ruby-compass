@@ -1,4 +1,4 @@
-@compassDebug = false
+@compassDebug = true
 
 @ConfigFiles = [
   name: "config.rb"
