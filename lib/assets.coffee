@@ -1,8 +1,12 @@
 @Config =
   debug: true
+  failure: false
   unacceptable: [ "publish" ]
 
   compile_args:
+    test: [
+      "-v"
+    ]
     prod: [
       "--compass"
     ]
@@ -24,10 +28,10 @@
 
   envs:
     Ruby:
-      cmd: "ruby"
+      cmd: "ruby2"
       spec: "required"
     Bundler:
-      cmd: "bundle"
+      cmd: "bunde"
       spec: "required"
     SASS:
       cmd: "sass"

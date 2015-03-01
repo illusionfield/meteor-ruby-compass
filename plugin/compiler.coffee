@@ -1,4 +1,6 @@
-{debug,compile_args,envs} = Config
+{debug,compile_args,envs,failure} = Config
+
+do CheckEnv
 
 devscript = (compileStep) ->
   #console.log compileStep
@@ -9,7 +11,7 @@ devscript = (compileStep) ->
 StylesheetCompiler = (compileStep) ->
   devscript compileStep if debug
   return if compileStep.pathForSourceMap[0] is "_" #path.basename(compileStep.inputPath)[0]
-  return console.warn "#{PreMsg 'warn'} #{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
+  return console.warn "#{PreMsg 'warn'} #{compileStep.inputPath} skipped! (#{failure})" if failure
 
   try
     {cmd} = envs.SASS
