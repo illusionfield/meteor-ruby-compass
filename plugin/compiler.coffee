@@ -1,41 +1,36 @@
-RunCommand = (bin,args,file) ->
-  ret = result: "", error: ""
-  processCode = undefined
-  try
-    future = new Future()
-    throw bin unless _.isString bin
-    throw args unless _.isArray args 
-    args = [file].concat args if file
-    cmd = spawn bin, args
-    cmd.stdout.on "data", (data) ->
-      ret.result += data.toString "utf8"
-    cmd.stderr.on "data", (data) ->
-      Msg.err data
-    cmd.on "error", (err) ->
-      Msg.err err if compassDebug #future.throw err
-      return err
-    cmd.on "close", (code) ->
-      return future.throw code if (processCode = code)
-      do future.return
-    do future.wait
-  catch e
-    ret.error =
-      message: "#{Msg.banner if processCode is -1 then 'error' else 'warning'} #{bin}: #{if compassDebug then e.stack else e}"
-      sourcePath: e.filename or file
-      line: e.line - 1
-      column: e.column + 1
-  ret
+{debug,compile_args,envs} = Config
+
+devscript = (compileStep) ->
+  #console.log compileStep
+  compileStep.addAsset
+    path: compileStep.inputPath
+    data: fs.readFileSync compileStep.fullInputPath
 
 StylesheetCompiler = (compileStep) ->
-  return if path.basename(compileStep.inputPath)[0] is "_"
-  return Msg.warn "#{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
-  args = [ "--compass", "--sourcemap=inline" ]
-  args.push "--trace" if compassDebug
-  {error,result} = RunCommand Envs.SASS.cmd, args, compileStep.fullInputPath
-  return compileStep.error error if error
-  compileStep.addStylesheet
-    path: "#{compileStep.inputPath}.css"
-    data: result
+  devscript compileStep if debug
+  return if compileStep.pathForSourceMap[0] is "_" #path.basename(compileStep.inputPath)[0]
+  return console.warn "#{PreMsg 'warn'} #{compileStep.inputPath} skipped! (#{CompassInit})" if CompassInit
+
+  try
+    {cmd} = envs.SASS
+    args = [].concat compile_args.prod
+    args = args.concat compile_args.devel if debug
+    args.push compileStep.fullInputPath
+
+    {stdout,stderr,code,err,msgtype} = do exec(cmd,args).wait
+    throw new Error "Process exited (#{code})" if code
+
+    compileStep.addStylesheet
+      path: "#{compileStep.inputPath}.css"
+      data: stdout
+
+  catch e
+    compileStep.error
+      message: "#{PreMsg msgtype} #{cmd}: #{if debug then e.stack else e}"
+      sourcePath: e.filename or compileStep.fullInputPath
+      line: e.line - 1
+      column: e.column + 1
+
 
 Plugin.registerSourceHandler "rb", null
 Plugin.registerSourceHandler "config.rb", {archMatching: 'web'}, -> #
