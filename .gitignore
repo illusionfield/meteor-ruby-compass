@@ -19,3 +19,4 @@ bundle
 .sass-cache
 config.rb
 Gemfile.lock
+.versions
