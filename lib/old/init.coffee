@@ -1,28 +1,22 @@
-path          = Npm.require "path"
-@fs           = Npm.require "fs"
-{spawn}       = Npm.require "child_process"
+fs = Npm.require "fs"
+@path = Npm.require "path"
+{spawn} = Npm.require "child_process"
 {gzip,gunzip} = Npm.require "zlib"
-Future        = Npm.require "fibers/future"
-Colors        = Npm.require "colors"
+Future = Npm.require "fibers/future"
+Colors = Npm.require "colors"
 
-{files,envs,unacceptable} = Config
+UnAcceptable = [ "publish" ]
 
 Colors.setTheme
-  verbose:  "cyan"
-  info:     "green"
-  warn:     "yellow"
-  debug:    "blue"
-  error:    "red"
+  verbose: "cyan"
+  info: "green"
+  warning: "yellow"
+  debug: "blue"
+  error: "red"
 
-@PreMsg = (msgtype) ->
-  msgtype = msgtype || 'info'
-  " #{'=>'.bold} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]: "
-
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!! Deprecated !!!!!!!!!!!!!!!!!!!!!!!!!!! #
 @Msg =
-  banner: (msgtype,message) ->
-    " #{'=>'.bold} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]: "
+  banner: (typ) ->
+    " #{'=>'.bold} [#{'RubySASS'.verbose.underline} #{(typ)[typ]}]:"
   message: (msg) ->
     if msg.message then msg.message else do msg.toString
   info: (msg) ->
@@ -31,8 +25,6 @@ Colors.setTheme
     console.warn do "#{@banner 'warning'} #{@message msg}".trim
   err: (msg) ->
     console.error do "#{@banner 'error'} #{@message msg}".trim
-# !!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!! #
-
 
 ArchiveUtility =
   uncompress: (archive,encoding) ->
@@ -64,7 +56,7 @@ ArchiveUtility =
     ret
 
 
-@exec = (cmd,args,file) ->
+@RunCommand = (cmd,args,file) ->
   return Msg.err "Command error: #{cmd}" unless _.isString cmd
   return Msg.err "Arguments error: #{args}" unless _.isArray args
 
@@ -90,19 +82,14 @@ ArchiveUtility =
     #return stream
 
   process.on "close", (code) ->
-    stream.msgtype = 'warn' if stream.code=code > 0
-    stream.msgtype = 'error' if stream.code=code < 0
+    stream.code = code
     ret.return stream
     #return ret.return stream
   ret.process = process
   ret
-  #message: "#{Msg.banner if processCode is -1 then 'error' else 'warning'} #{bin}: #{if compassDebug then e.stack else e}"
-  #sourcePath: e.filename or file
-  #line: e.line - 1
-  #column: e.column + 1
 
 ###
-exec = (cmd,args) ->
+RunCommand = (cmd,args) ->
   child = spawn cmd,args
   ret = undefined
   future = new Future()
@@ -121,14 +108,14 @@ exec = (cmd,args) ->
 
 CheckEnv = () ->
   ret = false
-  _(files).forEach ({name,content}) ->
+  _(ConfigFiles).forEach ({name,content}) ->
     return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
     Msg.info "#{name} not exists, creating on project root!"
     fs.writeFileSync confPath, ArchiveUtility.uncompress content,"base64"
-  _(envs).forEach ({cmd,spec}, name) ->
+  _(Envs).forEach ({cmd,spec}, name) ->
     try
-      #envs[name].version = exec cmd,["-v"]
-      v = exec cmd,["-v"]
+      #Envs[name].version = RunCommand cmd,["-v"]
+      v = RunCommand cmd,["-v"]
       Msg.info "#{name} (#{v}): #{'OK'.green}"    
     catch e
       return Msg.err e if spec isnt "required"
@@ -137,7 +124,7 @@ CheckEnv = () ->
 
 Init = () ->
   #try
-  return Msg.warn "#{arg} request: Temporarily not available in this package features ..." if (arg=process.argv[2]) in unacceptable
+  return Msg.warn "#{arg} request: Temporarily not available in this package features ..." if (arg=process.argv[2]) in UnAcceptable
   if (err=do CheckEnv)
     Msg.err "#{err} --[ Package DISABLED! ]--"
     throw err 
