@@ -5,7 +5,7 @@ fs           = Npm.require "fs"
 Future        = Npm.require "fibers/future"
 Colors        = Npm.require "colors"
 
-{files,envs,unacceptable,compile_args} = Config
+{files,envs,unacceptable} = Config
 
 Colors.setTheme
   verbose:  "cyan"
@@ -68,13 +68,24 @@ ArchiveUtility =
       throw new Error "Cannot create #{name.underline.debug} on project root: #{error}" if error
       console.info "#{do PreMsg} #{name} not exists, creating on project root!"
       fs.writeFileSync confPath, result
-    _(envs).forEach ({cmd,spec}, name) ->
-      args = [].concat compile_args.test
-      {stdout,stderr,code,error} = do exec(cmd,args).wait
+    
+    _(envs).forEach ({cmd,spec,test,init}, name) ->
+      test_args = [].concat test or '-v'
+      {stdout,stderr,code,error} = do exec(cmd,test_args).wait
       if error or code
         throw new Error "#{name} not available (exit #{code}): #{error}" if spec is "required"
         return console.warn "#{PreMsg 'warn'} #{name} not available (exit #{code}): #{error}"
-      return console.info "#{do PreMsg} #{name}: #{'OK'.green}"
+      return console.info "#{do PreMsg} #{name}: #{'OK'.green}" if spec isnt "required" or not init
+      init_args = [].concat init
+      {stdout,stderr,code,error} = do exec(cmd,init_args).wait
+      throw new Error "#{name} #{init_args} (exit #{code}): #{error}" if error or code
+      #throw new Error stderr if stderr
+      return console.warn "#{PreMsg 'warn'} #{name}: #{stderr}" if stderr
+      if stdout
+        console.info "#{do PreMsg} #{name} #{init_args}:"
+        console.info stdout
+      console.info "#{do PreMsg} #{name}: #{'OK'.green}"
+    
   catch e
     package_disabled = "--[ Package DISABLED! ]--".error
     console.error "#{PreMsg 'error'}#{e} #{package_disabled}"

@@ -9,6 +9,7 @@ RunDev = (compileStep) ->
 
 StylesheetCompiler = (compileStep) ->
   RunDev compileStep if debug
+  return if debug is "init"
   return if compileStep.pathForSourceMap[0] is "_"
   if failure
     failure_warn="#{failure}".warn
@@ -22,7 +23,9 @@ StylesheetCompiler = (compileStep) ->
 
     {stdout,stderr,code,error} = do exec(cmd,args).wait
     throw new Error "#{cmd}: (exit #{code}): #{error}" if code or error
-    throw new Error stderr if stderr
+    console.warn "#{PreMsg 'warn'} #{cmd}: #{stderr}" if stderr
+    return console.warn "#{PreMsg 'warn'} #{cmd}: #{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} empty, ignored!" unless stdout
+    #throw new Error stderr if stderr
 
     compileStep.addStylesheet
       path: "#{compileStep.inputPath}.css"

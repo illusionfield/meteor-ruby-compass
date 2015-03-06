@@ -1,12 +1,10 @@
 @Config =
+  # debug = false or true or "init"
   debug: false
   failure: false
   unacceptable: [ "publish" ]
 
   compile_args:
-    test: [
-      "-v"
-    ]
     prod: [
       "--compass"
     ]
@@ -30,12 +28,17 @@
     Ruby:
       cmd: "ruby"
       spec: "required"
+      test: "-v"
     Bundler:
       cmd: "bundle"
       spec: "required"
+      test: "-v"
+      init: "install"
     SASS:
       cmd: "sass"
       spec: "required"
+      test: "-v"
     Compass:
       cmd: "compass"
       spec: "required"
+      test: "-v"

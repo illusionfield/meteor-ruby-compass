@@ -4,7 +4,7 @@ Package.describe({
   summary: 'Ruby Compass integration',
   git: 'https://github.com/illusionfield/meteor-ruby-compass.git',
   name: 'illusionfield:ruby-compass',
-  version: '0.0.4',
+  version: '0.0.5',
   documentation: 'README.md'
 });
 
