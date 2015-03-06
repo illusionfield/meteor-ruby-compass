@@ -1,17 +1,18 @@
+do CheckEnv
 {debug,compile_args,envs,failure} = Config
 
-do CheckEnv
-
-devscript = (compileStep) ->
+RunDev = (compileStep) ->
   #console.log compileStep
   #compileStep.addAsset
   #  path: compileStep.inputPath
   #  data: fs.readFileSync compileStep.fullInputPath
 
 StylesheetCompiler = (compileStep) ->
-  devscript compileStep if debug
-  return if compileStep.pathForSourceMap[0] is "_" #path.basename(compileStep.inputPath)[0]
-  return console.warn "#{PreMsg 'warn'} #{compileStep.inputPath} skipped! (#{failure})" if failure
+  RunDev compileStep if debug
+  return if compileStep.pathForSourceMap[0] is "_"
+  if failure
+    failure_warn="#{failure}".warn
+    return console.warn "#{PreMsg 'warn'}#{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} skipped! #{failure_warn}"
 
   try
     {cmd} = envs.SASS
@@ -19,8 +20,9 @@ StylesheetCompiler = (compileStep) ->
     args = args.concat compile_args.devel if debug
     args.push compileStep.fullInputPath
 
-    {stdout,stderr,code,error,msgtype} = do exec(cmd,args).wait
-    #throw new Error "Process exited (#{code})" if code
+    {stdout,stderr,code,error} = do exec(cmd,args).wait
+    throw new Error "#{cmd}: (exit #{code}): #{error}" if code or error
+    throw new Error stderr if stderr
 
     compileStep.addStylesheet
       path: "#{compileStep.inputPath}.css"
@@ -28,7 +30,7 @@ StylesheetCompiler = (compileStep) ->
 
   catch e
     compileStep.error
-      message: "#{PreMsg msgtype} #{cmd}: #{if debug then e.stack else e}"
+      message: "#{PreMsg 'error'} #{cmd}: #{if debug then e.stack else e}"
       sourcePath: e.filename or compileStep.fullInputPath
       line: e.line - 1
       column: e.column + 1
