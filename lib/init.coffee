@@ -20,20 +20,37 @@ Colors.setTheme
 
 ArchiveUtility =
   uncompress: (archive,encoding) ->
-    future = new Future
-    ret = ""
-    try
-      gunzip (new Buffer archive,encoding or ""), (error,buf) ->
-        return future.throw error if error isnt null
-        ret = buf?.toString? "utf8" 
-        do future.return
-      do future.wait
-    catch e
-      console.error "#{PreMsg 'error'} #{e}"
-      return false
+    ret = new Future
+    gunzip (new Buffer archive,encoding or ""), (error,buf) ->
+      ret.return
+        error: error
+        result: buf?.toString? "utf8"
     ret
+
+    #stream = error: "", result: ""
+    #future = new Future
+    #ret = ""
+    #try
+      #stream.result = buf?.toString? "utf8"
+      #ret.return stream
+      #return future.throw error if error isnt null
+      #ret = buf?.toString? "utf8" 
+      #do future.return
+    #do ret.wait
+    #catch e
+    #  console.error "#{PreMsg 'error'} #{e}"
+    #  return false
+    #ret
   
   compress: (str,encoding) ->
+    ret = new Future
+    gzip (if typeof str is "string" then str else new Buffer str), (error,buf) ->
+      ret.return
+        error: error
+        result: buf?.toString? encoding or ""
+    ret
+
+    ###
     future = new Future
     ret = ""
     try
@@ -46,6 +63,7 @@ ArchiveUtility =
       console.error "#{PreMsg 'error'} #{e}"
       return false
     ret
+    ###
 
 
 @exec = (cmd,args,options) ->
@@ -53,48 +71,44 @@ ArchiveUtility =
   console.error "#{PreMsg 'error'} Arguments error: #{args}" unless _.isArray args
 
   options = options or {}
-  stream = stdout: "", stderr: "", code: 0, err: ""
+  stream = stdout: "", stderr: "", code: 0, error: ""
   ret = new Future
   process = spawn cmd, args, options
   process.stdout.setEncoding 'utf8'
   process.stderr.setEncoding 'utf8'
 
-  process.stdout.on "data", ((data) ->
+  process.stdout.on "data", (data) ->
     stream.stdout += data
-  ), (err) ->
-    stream.err += "stdout: #{err}"
 
-  process.stderr.on "data", ((data) ->
+  process.stderr.on "data", (data) ->
     stream.stderr += data
-  ), (err) ->
-    stream.err += "stderr: #{err}"
-  
+
   process.on "error", (err) ->
-    stream.err += err
+    stream.error += err
 
   process.on "close", (code) ->
-    stream.msgtype = 'warn' if stream.code=code > 0
-    stream.msgtype = 'error' if stream.code=code < 0
+    #stream.msgtype = 'warn' if stream.code=code > 0
+    #stream.msgtype = 'error' if stream.code=code < 0
     ret.return stream
   ret.process = process
   ret
 
 @CheckEnv = () ->
   return console.warn "#{PreMsg 'warn'} #{arg} request: Temporarily not available in this package features ..." if (arg=process.argv[2]) in unacceptable
-  try
-    _(files).forEach ({name,content}) ->
-      return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
-      console.info "#{do PreMsg} #{name} not exists, creating on project root!"
-      fs.writeFileSync confPath, ArchiveUtility.uncompress content,"base64"
-    _(envs).forEach ({cmd,spec}, name) ->
-      args = [].concat compile_args.test
-      {stdout,stderr,code,err,msgtype} = do exec(cmd,args).wait
-      return console.info "#{do PreMsg} #{name}: #{'OK'.green}" unless code
-      return console.warn "#{PreMsg 'warn'} #{name}: Process exited (#{code})" if spec isnt "requiured"
-      throw new Error "Process exited #{name} (#{code}): #{err}"
-  catch e
-    console.error "#{PreMsg 'error'} #{e} --[ Package DISABLED! ]--"
-    failure = e
+  #try
+  _(files).forEach ({name,content}) ->
+    return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
+    console.info "#{do PreMsg} #{name} not exists, creating on project root!"
+    fs.writeFileSync confPath, do ArchiveUtility.uncompress(content,"base64").wait
+  _(envs).forEach ({cmd,spec}, name) ->
+    args = [].concat compile_args.test
+    {stdout,stderr,code,error,msgtype} = do exec(cmd,args).wait
+    #return console.info "#{do PreMsg} #{name}: #{'OK'.green}" unless code
+    #return console.warn "#{PreMsg 'warn'} #{name}: Process exited (#{code})" if spec isnt "requiured"
+    #throw new Error "Process exited #{name} (#{code}): #{err}"
+  #catch e
+  #  console.error "#{PreMsg 'error'} #{e} --[ Package DISABLED! ]--"
+  #  failure = e
 
 
 ###

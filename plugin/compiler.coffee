@@ -4,9 +4,9 @@ do CheckEnv
 
 devscript = (compileStep) ->
   #console.log compileStep
-  compileStep.addAsset
-    path: compileStep.inputPath
-    data: fs.readFileSync compileStep.fullInputPath
+  #compileStep.addAsset
+  #  path: compileStep.inputPath
+  #  data: fs.readFileSync compileStep.fullInputPath
 
 StylesheetCompiler = (compileStep) ->
   devscript compileStep if debug
@@ -19,8 +19,8 @@ StylesheetCompiler = (compileStep) ->
     args = args.concat compile_args.devel if debug
     args.push compileStep.fullInputPath
 
-    {stdout,stderr,code,err,msgtype} = do exec(cmd,args).wait
-    throw new Error "Process exited (#{code})" if code
+    {stdout,stderr,code,error,msgtype} = do exec(cmd,args).wait
+    #throw new Error "Process exited (#{code})" if code
 
     compileStep.addStylesheet
       path: "#{compileStep.inputPath}.css"
