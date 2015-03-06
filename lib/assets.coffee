@@ -28,10 +28,10 @@
 
   envs:
     Ruby:
-      cmd: "ruby2"
+      cmd: "ruby"
       spec: "required"
     Bundler:
-      cmd: "bunde"
+      cmd: "bundle"
       spec: "required"
     SASS:
       cmd: "sass"

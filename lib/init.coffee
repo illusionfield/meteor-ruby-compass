@@ -95,50 +95,21 @@ ArchiveUtility =
 
 @CheckEnv = () ->
   return console.warn "#{PreMsg 'warn'} #{arg} request: Temporarily not available in this package features ..." if (arg=process.argv[2]) in unacceptable
-  #try
-  _(files).forEach ({name,content}) ->
-    return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
-    console.info "#{do PreMsg} #{name} not exists, creating on project root!"
-    fs.writeFileSync confPath, do ArchiveUtility.uncompress(content,"base64").wait
-  _(envs).forEach ({cmd,spec}, name) ->
-    args = [].concat compile_args.test
-    {stdout,stderr,code,error,msgtype} = do exec(cmd,args).wait
-    #return console.info "#{do PreMsg} #{name}: #{'OK'.green}" unless code
-    #return console.warn "#{PreMsg 'warn'} #{name}: Process exited (#{code})" if spec isnt "requiured"
-    #throw new Error "Process exited #{name} (#{code}): #{err}"
-  #catch e
-  #  console.error "#{PreMsg 'error'} #{e} --[ Package DISABLED! ]--"
-  #  failure = e
-
-
-###
-console.log cmd,args
-
-#throw new Error "#{error} --[ Package DISABLED! ]--"
-
-v = exec cmd,args
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!! Deprecated !!!!!!!!!!!!!!!!!!!!!!!!!!! #
-@Msg =
-  banner: (msgtype,message) ->
-    " #{'=>'.bold} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]: "
-  message: (msg) ->
-    if msg.message then msg.message else do msg.toString
-  info: (msg) ->
-    console.log do "#{@banner 'info'} #{@message msg}".trim
-  warn: (msg) ->
-    console.warn do "#{@banner 'warning'} #{@message msg}".trim
-  err: (msg) ->
-    console.error do "#{@banner 'error'} #{@message msg}".trim
-# !!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!! #
-
-
-Init = () ->
-   if (err=do CheckEnv)
-
-failure = do Init
-
-#if (err=do CheckEnv)
-  #console.error "#{err} --[ Package DISABLED! ]--"
-  #throw err 
-###
+  try
+    _(files).forEach ({name,content}) ->
+      #return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
+      confPath = "#{do process.cwd}/#{name}"
+      {error,result} = do ArchiveUtility.uncompress(content,"base64").wait
+      throw new Error "Cannot create #{name.underline.debug} on project root: #{error}" if error
+      console.info "#{do PreMsg} #{name} not exists, creating on project root!"
+      fs.writeFileSync confPath, result
+    _(envs).forEach ({cmd,spec}, name) ->
+      args = [].concat compile_args.test
+      {stdout,stderr,code,error} = do exec(cmd,args).wait
+      if error or code
+        throw new Error "#{name} not available (#{code}): #{error}" if spec is "required"
+        return console.warn "#{PreMsg 'warn'} #{name} not available (#{code}): #{error}"
+      return console.info "#{do PreMsg} #{name}: #{'OK'.green}"
+  catch e
+    console.error "#{PreMsg 'error'} #{e} --[ Package DISABLED! ]--"
+    failure = e
