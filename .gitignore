@@ -10,13 +10,12 @@ Thumbs.db
 
 # Application specific files
 .npm*
+.build*
+.versions
 node_modules
 
-.build*
-.bundle
-bundle
-
-.sass-cache
-config.rb
 Gemfile.lock
-.versions
+.bundle
+.sass-cache
+bundle
+config.rb
