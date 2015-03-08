@@ -1,17 +1,14 @@
 @Config =
-  # debug = false or true or "init"
-  debug: false
-  failure: false
-  unacceptable: [ "publish" ]
 
-  compile_args:
-    prod: [
-      "--compass"
-    ]
-    devel: [
-      "--sourcemap=inline"
-      "--trace"
-    ]
+  # enviroment = development or production
+  enviroment: "development"
+
+  # debug = false or true or "init"
+  debug: true
+
+  unacceptable: [
+    "publish"
+  ]
 
   files: [
     name: "config.rb"
@@ -42,3 +39,17 @@
       cmd: "compass"
       spec: "required"
       test: "-v"
+
+  compile_args:
+    production: [
+      "--compass"
+    ]
+    development: [
+      "--sourcemap=inline"
+      "--trace"
+    ]
+    debug: [
+      "-C"
+      "-g"
+      "-l"
+    ]

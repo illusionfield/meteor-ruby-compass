@@ -9,24 +9,42 @@ Package.describe({
 });
 
 Npm.depends({
-  'jquery': '2.1.3'
+  'jquery': '2.1.3',
+  'lodash': '3.4.0'
 });
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3');
-  api.use(['coffeescript', 'underscore']);
+  api.use([
+    'coffeescript'
+  ]);
 });
 
 Package.registerBuildPlugin({
   name: 'StylesheetCompiler',
-  use:  [ 'coffeescript', 'underscore' ],
-  sources: [ 'lib/assets.coffee', 'lib/init.coffee', 'plugin/compiler.coffee' ],
-  npmDependencies: { 'colors': '1.0.3' }
+  use:  [ 'coffeescript' ],
+  sources: [
+    'lib/assets.coffee',
+    'lib/init.coffee',
+    'plugin/compiler.coffee'
+  ],
+  npmDependencies: {
+    'colors': '1.0.3',
+    'lodash': '3.4.0'
+  }
 });
 
 Package.onTest(function(api) {
-  api.use(['tinytest', 'coffeescript', 'templating', 'blaze']);
-  api.use('illusionfield:ruby-compass');
+  api.use([
+    'tinytest',
+    'coffeescript',
+    'templating',
+    'blaze'
+  ]);
+
+  api.use([
+    'illusionfield:ruby-compass'
+  ]);
 
   api.add_files([
     '.npm/package/node_modules/jquery/dist/jquery.js',

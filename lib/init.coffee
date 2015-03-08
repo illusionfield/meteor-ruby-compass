@@ -1,11 +1,10 @@
 path          = Npm.require "path"
-fs           = Npm.require "fs"
+fs            = Npm.require "fs"
 {spawn}       = Npm.require "child_process"
 {gzip,gunzip} = Npm.require "zlib"
 Future        = Npm.require "fibers/future"
 Colors        = Npm.require "colors"
-
-{files,envs,unacceptable} = Config
+_             = Npm.require "lodash"
 
 Colors.setTheme
   verbose:  "cyan"
@@ -14,9 +13,11 @@ Colors.setTheme
   debug:    "blue"
   error:    "red"
 
+{debug,files,envs,unacceptable} = Config
+
 @PreMsg = (msgtype) ->
   msgtype = msgtype || 'info'
-  " #{'=>'.bold} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]: "
+  " #{'=>'.info} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]:"
 
 ArchiveUtility =
   uncompress: (archive,encoding) ->
@@ -56,11 +57,19 @@ ArchiveUtility =
 
   process.on "close", (code) ->
     ret.return stream
+
   ret.process = process
   ret
 
 @CheckEnv = () ->
-  return console.warn "#{PreMsg 'warn'} #{arg} request: Temporarily not available in this package features ..." if (arg=process.argv[2]) in unacceptable
+  do RunDev if debug
+
+  ret = result: "", error: ""
+  if process.argv[2] in unacceptable
+    ret.warning = "#{process.argv[2]} request: Temporarily not available in this package features ...".warn
+    console.warn "#{PreMsg 'warn'} #{ret.warning}"
+    return ret
+
   try
     _(files).forEach ({name,content}) ->
       return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
@@ -85,8 +94,14 @@ ArchiveUtility =
         console.info "#{do PreMsg} #{name} #{init_args}:"
         console.info stdout
       console.info "#{do PreMsg} #{name}: #{'OK'.green}"
-    
+
   catch e
-    package_disabled = "--[ Package DISABLED! ]--".error
-    console.error "#{PreMsg 'error'}#{e} #{package_disabled}"
-    Config.failure = e
+    console.error "#{PreMsg 'error'}#{e} #{"--[ Package DISABLED! ]--".error}".replace "\n", " "
+    ret.error = "#{e}".warn
+  
+  finally
+    return ret
+
+RunDev = (options) ->
+  options = options or {}
+

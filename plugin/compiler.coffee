@@ -1,24 +1,27 @@
-do CheckEnv
-{debug,compile_args,envs,failure} = Config
+path          = Npm.require "path"
+fs            = Npm.require "fs"
+_             = Npm.require "lodash"
 
-RunDev = (compileStep) ->
-  #console.log compileStep
-  #compileStep.addAsset
-  #  path: compileStep.inputPath
-  #  data: fs.readFileSync compileStep.fullInputPath
+{debug,enviroment,compile_args,envs} = Config
+checkedEnv = do CheckEnv
 
 StylesheetCompiler = (compileStep) ->
-  RunDev compileStep if debug
   return if debug is "init"
-  return if compileStep.pathForSourceMap[0] is "_"
-  if failure
-    failure_warn="#{failure}".warn
-    return console.warn "#{PreMsg 'warn'}#{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} skipped! #{failure_warn}"
+  RunDev compileStep if debug
+
+  if compileStep.pathForSourceMap[0] is "_"
+    console.log "#{PreMsg} #{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} skipped!\n\t" if debug
+    return
+
+  if checkedEnv.error
+    console.warn "#{PreMsg 'warn'} #{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} skipped!\n\t#{checkedEnv.error}" if debug
+    return
 
   try
     {cmd} = envs.SASS
-    args = [].concat compile_args.prod
-    args = args.concat compile_args.devel if debug
+    args = [].concat compile_args.production
+    args = args.concat compile_args.development if enviroment is "development"
+    args = args.concat compile_args.debug if debug
     args.push compileStep.fullInputPath
 
     {stdout,stderr,code,error} = do exec(cmd,args).wait
@@ -33,9 +36,10 @@ StylesheetCompiler = (compileStep) ->
 
   catch e
     compileStep.error
-      message: "#{PreMsg 'error'} #{cmd}: #{if debug then e.stack else e}"
+      message: "#{PreMsg 'error'} #{cmd}: #{e.message}\n
+                #{PreMsg 'error'} #{if debug then e.stack else e}"
       sourcePath: e.filename or compileStep.fullInputPath
-      line: e.line - 1
+      line: e.line
       column: e.column + 1
 
 
@@ -45,3 +49,11 @@ Plugin.registerSourceHandler "compass.rb", {archMatching: 'web'}, -> #
 
 Plugin.registerSourceHandler "scss", {archMatching: 'web'}, StylesheetCompiler
 Plugin.registerSourceHandler "sass", {archMatching: 'web'}, StylesheetCompiler
+
+RunDev = (compileStep, options) ->
+  options = options or {}
+  console.log "-- Debug #{compileStep.inputPath} --"
+  #console.log compileStep
+  #compileStep.addAsset
+  #  path: compileStep.inputPath
+  #  data: fs.readFileSync compileStep.fullInputPath
