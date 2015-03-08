@@ -19,3 +19,6 @@ Gemfile.lock
 .sass-cache
 bundle
 config.rb
+
+Gemfile
+Rakefile

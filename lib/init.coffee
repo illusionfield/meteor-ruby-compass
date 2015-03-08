@@ -3,8 +3,8 @@ fs            = Npm.require "fs"
 {spawn}       = Npm.require "child_process"
 {gzip,gunzip} = Npm.require "zlib"
 Future        = Npm.require "fibers/future"
-Colors        = Npm.require "colors"
 _             = Npm.require "lodash"
+Colors        = Npm.require "colors"
 
 Colors.setTheme
   verbose:  "cyan"
@@ -17,7 +17,7 @@ Colors.setTheme
 
 @PreMsg = (msgtype) ->
   msgtype = msgtype or 'info'
-  " #{'=>'.info} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]:"
+  " #{'=>'.green} [#{'RubySASS'.underline.cyan} #{Colors[msgtype] msgtype}]:"
 
 ArchiveUtility =
   uncompress: (archive,encoding) ->
@@ -100,12 +100,12 @@ ArchiveUtility =
 
   catch e
     console.error "#{PreMsg 'error'}#{e} #{"--[ Package DISABLED! ]--".error}".replace "\n", " "
-    ret.error = "#{e}".warn
+    ret.error = "#{e}".yellow
   
   finally
     return ret
 
 RunDev = (options) ->
   options = options or {}
-  console.info "-- Init debug --".debug
+  console.info "-- Init debug --".blue
 

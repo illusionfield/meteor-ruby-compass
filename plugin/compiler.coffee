@@ -52,7 +52,7 @@ Plugin.registerSourceHandler "sass", {archMatching: 'web'}, StylesheetCompiler
 
 RunDev = (compileStep, options) ->
   options = options or {}
-  console.info "-- Compiler debug #{compileStep.inputPath} --".debug
+  console.info "-- Compiler debug #{compileStep.inputPath} --".blue
   #console.log compileStep
   #compileStep.addAsset
   #  path: compileStep.inputPath
