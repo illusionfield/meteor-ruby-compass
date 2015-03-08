@@ -10,7 +10,7 @@ StylesheetCompiler = (compileStep) ->
   RunDev compileStep if debug
 
   if compileStep.pathForSourceMap[0] is "_"
-    console.log "#{PreMsg} #{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} skipped!\n\t" if debug
+    console.info "#{PreMsg 'info'} #{compileStep.inputPath.underline.debug} in #{compileStep.arch.underline} skipped!\n\t" if debug
     return
 
   if checkedEnv.error
@@ -52,7 +52,7 @@ Plugin.registerSourceHandler "sass", {archMatching: 'web'}, StylesheetCompiler
 
 RunDev = (compileStep, options) ->
   options = options or {}
-  console.log "-- Debug #{compileStep.inputPath} --"
+  console.info "-- Compiler debug #{compileStep.inputPath} --".debug
   #console.log compileStep
   #compileStep.addAsset
   #  path: compileStep.inputPath

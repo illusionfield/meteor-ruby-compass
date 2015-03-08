@@ -16,7 +16,7 @@ Colors.setTheme
 {debug,files,envs,unacceptable} = Config
 
 @PreMsg = (msgtype) ->
-  msgtype = msgtype || 'info'
+  msgtype = msgtype or 'info'
   " #{'=>'.info} [#{'RubySASS'.verbose.underline} #{(msgtype)[msgtype]}]:"
 
 ArchiveUtility =
@@ -71,20 +71,22 @@ ArchiveUtility =
     return ret
 
   try
-    _(files).forEach ({name,content}) ->
+    do _(files).forEach ({name,content}) ->
       return if fs.existsSync (confPath = "#{do process.cwd}/#{name}")
       {error,result} = do ArchiveUtility.uncompress(content,"base64").wait
       throw new Error "Cannot create #{name.underline.debug} on project root: #{error}" if error
       console.info "#{do PreMsg} #{name} not exists, creating on project root!"
       fs.writeFileSync confPath, result
+    .value
     
-    _(envs).forEach ({cmd,spec,test,init}, name) ->
+    do _(envs).forEach ({cmd,spec,test,init}, name) ->
       test_args = [].concat test or '-v'
       {stdout,stderr,code,error} = do exec(cmd,test_args).wait
       if error or code
         throw new Error "#{name} not available (exit #{code}): #{error}" if spec is "required"
         return console.warn "#{PreMsg 'warn'} #{name} not available (exit #{code}): #{error}"
       return console.info "#{do PreMsg} #{name}: #{'OK'.green}" if spec isnt "required" or not init
+      
       init_args = [].concat init
       {stdout,stderr,code,error} = do exec(cmd,init_args).wait
       throw new Error "#{name} #{init_args} (exit #{code}): #{error}" if error or code
@@ -94,6 +96,7 @@ ArchiveUtility =
         console.info "#{do PreMsg} #{name} #{init_args}:"
         console.info stdout
       console.info "#{do PreMsg} #{name}: #{'OK'.green}"
+    .value
 
   catch e
     console.error "#{PreMsg 'error'}#{e} #{"--[ Package DISABLED! ]--".error}".replace "\n", " "
@@ -104,4 +107,5 @@ ArchiveUtility =
 
 RunDev = (options) ->
   options = options or {}
+  console.info "-- Init debug --".debug
 
