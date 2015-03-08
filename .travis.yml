@@ -14,8 +14,8 @@ before_install:
   - curl https://install.meteor.com | /bin/sh
 
   # Git
-  - test -e .gitmodules && sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-  - git submodule update --init --recursive
+  #- test -e .gitmodules && sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  #- git submodule update --init --recursive
 
   # Ruby
   - which bundle >/dev/null || gem install bundler
